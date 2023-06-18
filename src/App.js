@@ -1,17 +1,27 @@
 import * as d3 from "d3"
 import { useState, useEffect, useRef } from "react"
 
+import Details from "./Details.js"
+import Editor from "./Editor.js"
+import NodeGraph from "./NodeGraph.js"
+
 import './App.css'
 
 function App() {
   return (
-    <svg>
-      <circle 
-        cx="50"
-        cy="50"
-        r="50"
-      />
-    </svg>
+    <div className="app">
+      <header className="header">
+        materially
+      </header>
+      <main className="content">
+        <Editor />
+        <NodeGraph />
+        <Details />
+      </main>
+      <footer className="footer">
+      </footer>
+    </div>
+    
   )
 }
 
