@@ -7,6 +7,8 @@ import NodeGraph from "./NodeGraph.js"
 
 import './App.css'
 
+import { data } from "./data.js"
+
 function App() {
   return (
     <div className="app">
@@ -14,9 +16,9 @@ function App() {
         materially
       </header>
       <main className="content">
-        <Editor />
-        <NodeGraph />
-        <Details />
+        <Editor data={data}/>
+        <NodeGraph data={data}/>
+        <Details data={data}/>
       </main>
       <footer className="footer">
       </footer>

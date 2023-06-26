@@ -20,7 +20,7 @@
 
 .content {
   display: grid;
-  grid-template-columns: 30% 70%;
+  grid-template-columns: 20% 80%;
   grid-template-rows: 80% 20%;
   grid-template-areas:
    "editor nodegraph"
@@ -31,11 +31,34 @@
 
 .editor {
   grid-area: editor;
-  resize: horizontal;
+  display: flex;
+  flex-direction: column;
 }
 
 .editormenu {
+  width: 100%;
+  height: 4%;
   background-color: steelblue;
+}
+
+.primview {
+  width: 100%;
+  height: 96%;
+  overflow: scroll;
+  cursor: pointer;
+}
+
+.primtable {
+  width: 100%;
+  border-spacing: 0;
+  font-size: 0.8rem;
+  color: white;
+}
+
+.primtable th {
+  text-align: left;
+  color: white;
+  background-color: blue;
 }
 
 .editortextarea {
@@ -117,7 +140,7 @@
 }
 
 .shader-background--selected {
-  fill:rgb(134, 218, 161);
+  fill:rgb(0, 64, 238);
   stroke: rgb(255, 0, 157);
   stroke-width: 2px;
 }
@@ -137,6 +160,18 @@
 .attr-circle-in {
   fill: yellow;
 }
+
+.attr-text-input {
+  fill: white;
+  font-size: 8px;
+}
+
+.attr-text-output {
+  fill: white;
+  font-size: 8px;
+  text-anchor: end;
+}
+
 
 .details {
   grid-area: details;

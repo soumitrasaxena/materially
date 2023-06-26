@@ -1,82 +1,15 @@
 import * as d3 from "d3"
 import { useState, useEffect, useRef } from "react"
 
-const material = {
-  name: "mouth_mtl",
-  primPath: "/skin_0/Looks/mouth_mtl",
-  attributes: {
-    "token outputs:moonray:surface.connect": "</skin_0/Looks/mouth_mtl/DwaSkinMaterial1_moonray.outputs:surface>"
-  },
-  type: "UsdMaterial",
-  shaders: [
-    {
-      name: "DwaSkinMaterial1_moonray",
-      type: "DwaSkinMaterial",
-      primPath: "/skin_0/Looks/mouth_mtl/DwaSkinMaterial1_moonray",
-      attributes: {
-        "uniform token info:id": "DwaSkinMaterial",
-        "float3 inputs:albedo.connect": "</skin_0/Looks/mouth_mtl/ColorCorrectHsvMap1_moonray.outputs:out>",
-        "string inputs:diffuse_transmission_blending_behavior": "RGB",
-        "bool inputs:enable_sss_input_normal": 1,
-        "token inputs:input_normal.connect": "</skin_0/Looks/mouth_mtl/nml_moonray.outputs:out>",
-        "float inputs:refractive_index": 1.4,
-        "float inputs:roughness": 1,
-        "float inputs:roughness.connect": "</skin_0/Looks/mouth_mtl/rgh_moonray.outputs:out>",
-        "color3f inputs:scattering_color": [1, 0.28399998, 0.28399998],
-        "float inputs:scattering_radius": 0.5,
-        "string inputs:specular_model": "GGX",
-        "token outputs:surface": "",
-        "uniform float2 ui:nodegraph:node:pos": "(6.55941, 0.809715)"
-      },
-      coord: {
-        x: 300,
-        y: 100
-      }
-    },
-    {
-      name: "ColorCorrectHsvMap1_moonray",
-      type: "ColorCorrectHsvMap",
-      primPath: "/skin_0/Looks/mouth_mtl/ColorCorrectHsvMap1_moonray",
-      attributes: {
-        "uniform token info:id": "ColorCorrectHsvMap",
-        "float3 inputs:input.connect": "</skin_0/Looks/mouth_mtl/clr_moonray.outputs:out>",
-        "float3 outputs:out": "",
-        "uniform float2 ui:nodegraph:node:pos": "(0.823854, -0.91829)"
-},
-      coord: {
-        x: 100,
-        y: 300
-      }
-    }
-  ],
-  coord: {
-    x: 100,
-    y: 100
+
+function getElidedText(text, elideLength=18) {
+  if (text.length >= elideLength){
+    return `${text.substring(0, elideLength - 4)}...`
+  } else {
+    return text
   }
 }
 
-const shader = material.shaders[0]
-
-function Attribute({attribute}) {
-  return (
-    <g
-      className="attr"
-    >
-      <circle 
-        cx="100"
-        cy="140"
-        r="4"
-        className="attr-circle-out"
-      />
-      <circle 
-        cx="100"
-        cy="140"
-        r="2"
-        className="attr-circle-in"
-      />
-    </g>
-  )
-}
 
 function ShaderIcon({shader}) {
   return (
@@ -101,24 +34,92 @@ function ShaderIcon({shader}) {
   )
 }
 
+
+function Attribute({attribute, cx, cy, dx=0, dy=0, textclass="attr-text-input"}) {
+  
+  const namespaceless = attribute.key.split(':')[attribute.key.split(':').length - 1]
+  const displayname = namespaceless.split('.connect')[0]
+
+  return (
+    <g
+      className="attr"
+    >
+      <circle 
+        cx={cx}
+        cy={cy}
+        r="4"
+        className="attr-circle-out"
+      />
+      <circle 
+        cx={cx}
+        cy={cy}
+        r="2"
+        className="attr-circle-in"
+      />
+      <text
+        x={cx + dx}
+        y={cy + dy}
+        className={textclass}
+      >
+        {getElidedText(displayname, )}
+      </text>
+    </g>
+  )
+}
+
+
 function Shader({shader, isSelected, onClick}) {
 
   const inputEls = []
-  for (const key in shader.attributes){
-    if (key.includes("inputs:") && key.includes(".connect")){
-      console.log(key)
+  const outputEls = []
+
+  // Figure out the height of the input and output elements.
+  var inputHeight = 40
+  var outputHeight = 40
+  
+  var inputCounter = 0
+  var outputCounter = 0
+  for (const attr of shader.attributes){
+    if (attr.key.includes("inputs:")){
+      inputEls.push((
+        <Attribute
+          key={attr.key} 
+          attribute={attr}
+          cx={shader.coord.x}
+          cy={shader.coord.y + 40 + inputCounter * 12}
+          dx={10}
+          dy={3} 
+          textclass='attr-text-input'
+        />
+      ))
+      inputCounter = inputCounter + 1
+    }
+    if (attr.key.includes("outputs:")){
+      outputEls.push((
+        <Attribute 
+          key={attr.key} 
+          attribute={attr}
+          cx={shader.coord.x + 120}
+          cy={shader.coord.y + 40 + outputCounter * 12}
+          dx={-10}
+          dy={3}
+          textclass='attr-text-output' 
+        />
+      ))
+      outputCounter = outputCounter + 1
     }
   }
+  // Font size for attribute text is 12px.
+  // TODO: Get the 12px font size from the CSS.
+  inputHeight = inputHeight + 12 * inputCounter  
+  outputHeight = outputHeight + 12 * outputCounter
 
+  // The higher number should be the height of the shader rect.
+  var height = inputHeight >= outputHeight ? inputHeight : outputHeight
 
-  function getElidedText(text) {
-    if (text.length >= 18){
-      return `${text.substring(0, 14)}...`
-    } else {
-      return text
-    }
-  }
-
+  // Add 20px padding to the height
+  height = height + 20
+  
   return (
     <g 
       className="shader"
@@ -130,7 +131,7 @@ function Shader({shader, isSelected, onClick}) {
         x={shader.coord.x}
         y={shader.coord.y}
         width="120"
-        height="60"
+        height={height}
         className={
           isSelected ? "shader-background--selected" : 
           "shader-background"
@@ -138,7 +139,7 @@ function Shader({shader, isSelected, onClick}) {
       />
       <text
         x={shader.coord.x}
-        y={shader.coord.y + 70}
+        y={shader.coord.y + height + 5}
         className="shader-coord"
       >
         {`${shader.coord.x}, ${shader.coord.y}`}
@@ -168,7 +169,8 @@ function Shader({shader, isSelected, onClick}) {
       >
         {getElidedText(shader.type)}
       </text>
-      <Attribute />
+      {inputEls}
+      {outputEls}
     </g>
   )
 }
